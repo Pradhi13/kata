@@ -4,6 +4,7 @@ import com.bnp.kata.model.BookItems;
 import com.bnp.kata.model.Books;
 import com.bnp.kata.model.OrderResponse;
 import com.bnp.kata.service.BookPricingService;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,11 +22,8 @@ public class BookController {
     }
 
     @PostMapping("/calculatePrice")
-    public ResponseEntity totalOrderDetails(@RequestBody Books books) {
-        double totalPrice = bookPricingService.calculateBestPrice(books.getBookList());
-        int totalQuantity = books.getBookList().stream().mapToInt(BookItems::getQuantity).sum();
-        OrderResponse orderResponse = new OrderResponse(books.getBookList(),totalQuantity,totalPrice);
-        return ResponseEntity.ok(orderResponse);
+    public ResponseEntity<OrderResponse> totalOrderDetails(@RequestBody Books books) {
+        return ResponseEntity.ok(bookPricingService.calculateOrderDetails(books.getBooks()));
 
     }
 

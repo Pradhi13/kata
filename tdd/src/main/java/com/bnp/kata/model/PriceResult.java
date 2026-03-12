@@ -6,12 +6,11 @@ import lombok.Setter;
 
 import java.util.List;
 
+@AllArgsConstructor
 @Getter
 @Setter
-@AllArgsConstructor
-public class OrderResponse {
+public class PriceResult {
 
+    private double price;
     private List<GroupDetails> groups;
-    private double totalPrice;
-    private double discountedPrice;
 }

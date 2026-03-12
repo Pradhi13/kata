@@ -1,16 +1,15 @@
 package com.bnp.kata.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
+@Getter
+@Setter
 public class Books {
 
-    private List<BookItems> bookList;
+    private List<BookItems> books;
 
-    public List<BookItems> getBookList() {
-        return bookList;
-    }
 
-    public void setBookList(List<BookItems> bookList) {
-        this.bookList = bookList;
-    }
 }

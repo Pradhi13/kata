@@ -9,9 +9,11 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class OrderResponse {
+public class GroupDetails {
 
-    private List<GroupDetails> groups;
-    private double totalPrice;
-    private double discountedPrice;
+    private List<String> books;
+    private  int groupSize;
+    private double discountPercentage;
+    private double afterdiscountPrice;
+
 }

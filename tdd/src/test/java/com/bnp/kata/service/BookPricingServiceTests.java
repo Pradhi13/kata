@@ -1,8 +1,12 @@
 package com.bnp.kata.service;
 
 import com.bnp.kata.model.BookItems;
+import com.bnp.kata.model.GroupDetails;
+import com.bnp.kata.model.OrderResponse;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,11 +15,13 @@ public class BookPricingServiceTests {
 
     BookPricingService bookPricingService = new BookPricingService();
 
+
+
     @Test
     void singleBook() {
         List<BookItems> books = List.of(new BookItems("Clean Code", 1));
-        double price = bookPricingService.calculateBestPrice(books);
-        assertEquals(50, price);
+        OrderResponse response = bookPricingService.calculateOrderDetails(books);
+        assertEquals(50, response.getDiscountedPrice());
     }
 
     @Test
@@ -26,9 +32,9 @@ public class BookPricingServiceTests {
                 new BookItems("Clean Coder", 1)
         );
 
-        double price = bookPricingService.calculateBestPrice(books);
+        OrderResponse response = bookPricingService.calculateOrderDetails(books);
 
-        assertEquals(95, price);
+        assertEquals(95, response.getDiscountedPrice());
     }
 
     @Test
@@ -39,9 +45,9 @@ public class BookPricingServiceTests {
                 new BookItems("Clean Coder", 1),
                 new BookItems("Clean Architecture", 1)
         );
-        double price = bookPricingService.calculateBestPrice(books);
+        OrderResponse response = bookPricingService.calculateOrderDetails(books);
 
-        assertEquals(135, price);
+        assertEquals(135, response.getDiscountedPrice());
     }
 
 
@@ -55,9 +61,9 @@ public class BookPricingServiceTests {
                 new BookItems("TDD", 1)
         );
 
-        double price = bookPricingService.calculateBestPrice(books);
+        OrderResponse response = bookPricingService.calculateOrderDetails(books);
 
-        assertEquals(160, price);
+        assertEquals(160, response.getDiscountedPrice());
     }
 
     @Test
@@ -71,9 +77,9 @@ public class BookPricingServiceTests {
                 new BookItems("Legacy Code", 1)
         );
 
-        double price = bookPricingService.calculateBestPrice(books);
+        OrderResponse response = bookPricingService.calculateOrderDetails(books);
 
-        assertEquals(187.5, price);
+        assertEquals(187.5, response.getDiscountedPrice());
     }
 
     @Test
@@ -87,9 +93,9 @@ public class BookPricingServiceTests {
                 new BookItems("Legacy Code", 1)
         );
 
-        double price = bookPricingService.calculateBestPrice(books);
+        OrderResponse response = bookPricingService.calculateOrderDetails(books);
 
-        assertEquals(320, price);
+        assertEquals(320, response.getDiscountedPrice());
     }
 }
 

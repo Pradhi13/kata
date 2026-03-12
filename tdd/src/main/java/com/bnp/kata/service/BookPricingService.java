@@ -1,6 +1,9 @@
 package com.bnp.kata.service;
 
 import com.bnp.kata.model.BookItems;
+import com.bnp.kata.model.GroupDetails;
+import com.bnp.kata.model.OrderResponse;
+import com.bnp.kata.model.PriceResult;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -14,58 +17,76 @@ public class BookPricingService {
     private static final Map<Integer, Double> DISCOUNT =
             Map.of(1, 0.0, 2, 0.05, 3, 0.10, 4, 0.20, 5, 0.25);
 
-    private final Map<String, Double> cache = new HashMap<>();
-
-    public double calculateBestPrice(List<BookItems> items) {
+    public OrderResponse calculateOrderDetails(List<BookItems> items) {
 
         int[] quantities = items.stream()
                 .mapToInt(BookItems::getQuantity)
                 .toArray();
 
-        return findMinPrice(quantities);
+        String[] titles = items.stream()
+                .map(BookItems::getTitle)
+                .toArray(String[]::new);
+
+        PriceResult result = findBestPrice(quantities, titles);
+
+        int totalBooks = Arrays.stream(quantities).sum();
+
+        double totalPrice = totalBooks * BOOK_PRICE;
+
+        return new OrderResponse(
+                result.getGroups(),
+                totalPrice,
+                result.getPrice()
+        );
     }
 
-    private double findMinPrice(int[] books) {
+    private PriceResult findBestPrice(int[] books, String[] titles) {
 
-        String key = Arrays.toString(books);
+        if (Arrays.stream(books).allMatch(q -> q == 0)) {
+            return new PriceResult(0, new ArrayList<>());
+        }
 
-        if (cache.containsKey(key))
-            return cache.get(key);
-
-        if (Arrays.stream(books).allMatch(q -> q == 0))
-            return 0;
-
-        double minPrice = IntStream.rangeClosed(1, books.length)
-                .mapToDouble(size -> calculateSetPrice(size, books))
-                .filter(price -> price > 0)
-                .min()
-                .orElse(Double.MAX_VALUE);
-
-        cache.put(key, minPrice);
-
-        return minPrice;
+        return IntStream.rangeClosed(1, books.length)
+                .mapToObj(size -> calculateGroupPrice(size, books, titles))
+                .filter(Objects::nonNull)
+                .min(Comparator.comparingDouble(PriceResult::getPrice))
+                .orElse(new PriceResult(Double.MAX_VALUE, new ArrayList<>()));
     }
 
-    private double calculateSetPrice(int size, int[] books) {
+    private PriceResult calculateGroupPrice(int size, int[] books, String[] titles) {
 
         int[] next = Arrays.copyOf(books, books.length);
 
-        int count = 0;
-
-        for (int i = 0; i < next.length && count < size; i++) {
-
-            if (next[i] > 0) {
-                next[i]--;
-                count++;
-            }
+        List<Integer> selectedIndices = IntStream.range(0, next.length)
+                .filter(i -> next[i] > 0)
+                .limit(size)
+                .boxed()
+                .toList();
+        if (selectedIndices.size() != size) {
+            return null;
         }
+        selectedIndices.forEach(i -> next[i]--);
 
-        if (count != size)
-            return 0;
+        List<String> groupBooks = selectedIndices.stream().map(i -> titles[i]).toList();
 
-        double price = size * BOOK_PRICE * (1 - DISCOUNT.get(size));
+        double groupPrice = size * BOOK_PRICE * (1 - DISCOUNT.get(size));
 
-        return price + findMinPrice(next);
+        PriceResult result = findBestPrice(next, titles);
+
+        double total = groupPrice + result.getPrice();
+
+        List<GroupDetails> groups = new ArrayList<>();
+
+        groups.add(new GroupDetails(
+                groupBooks,
+                size,
+                DISCOUNT.get(size) * 100,
+                groupPrice
+        ));
+
+        groups.addAll(result.getGroups());
+
+        return new PriceResult(total, groups);
     }
 
 
