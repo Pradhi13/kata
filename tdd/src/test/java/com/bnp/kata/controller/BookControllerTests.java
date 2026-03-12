@@ -8,6 +8,7 @@ import com.bnp.kata.service.BookPricingService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -47,14 +48,15 @@ class BookControllerTests {
                 new BookItems("TDD",1),
                 new BookItems("Legacy Code",1)
         ));
-
         Mockito.when(bookPricingService.calculateBestPrice(Mockito.anyList()))
                 .thenReturn(320.0);
 
-        mockMvc.perform(post("/api/books/basket")
+        mockMvc.perform(post("/api/books/calculatePrice")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("320.0"));
+                .andExpect(jsonPath("$.finalPrice").value(320.0))
+                .andExpect(jsonPath("$.totalBooks").value(8))
+                .andExpect(jsonPath("$.books").isArray());
     }
 }
